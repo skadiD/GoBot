@@ -1,0 +1,5 @@
+bot:
+  ws: "127.0.0.1:25000"
+  key: "skadiDD12580"
+  debug: false
+db: "bot.db"
