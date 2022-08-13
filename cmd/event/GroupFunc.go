@@ -6,6 +6,7 @@ import (
 	"gobot/cmd/globals"
 	"gobot/cmd/structs"
 	"strconv"
+	"strings"
 )
 
 // BotJoinGroupEvent 邀请BOT入群
@@ -45,19 +46,7 @@ func BotUnmuteEvent(_ *gjson.Result, origin []byte) {
 
 // GroupMessage 群聊消息
 // 解析捏麻麻
-func GroupMessage(data *gjson.Result, origin []byte) string {
-	/*
-		var _data structs.GroupMessage
-		json.Unmarshal(origin, &_data)
-		switch _data.Data.MessageChain[1].Type {
-		case "Plain":
-			globals.Logger().
-				Info("群 " + strconv.FormatInt(_data.Data.Sender.Group.ID, 10) + " 内成员 " + strconv.FormatInt(_data.Data.Sender.ID, 10) + " 发送消息").
-				Success("消息内容: " + _data.Data.MessageChain[1].Text).
-				Run()
-		}
-	*/
-	//go globals.Bot.SendGroupMessage(677098563, "test")
+func GroupMessage(data *gjson.Result, origin []byte) (string, int64) {
 	chain := data.Get("data.messageChain.1")
 	group := data.Get("data.sender")
 	switch chain.Get("type").String() {
@@ -71,12 +60,12 @@ func GroupMessage(data *gjson.Result, origin []byte) string {
 			Info("群 " + group.Get("group.id").String() + " 内成员 " + group.Get("id").String() + " 发送消息").
 			Success("消息内容: " + chain.Get("text").String()).
 			Run()
-		return chain.Get("text").String()
+		return strings.Trim(chain.Get("text").String(), " "), group.Get("group.id").Int()
 	case "Image":
 		globals.Logger().
 			Info("群 " + group.Get("group.id").String() + " 内成员 " + group.Get("id").String() + " 发送照片").
 			Success("消息内容: " + chain.Get("url").String()).
 			Run()
 	}
-	return ""
+	return "", 0
 }

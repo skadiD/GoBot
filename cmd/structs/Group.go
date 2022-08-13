@@ -58,3 +58,9 @@ type SendGroupMessage struct {
 	Target       int64          `json:"target"`
 	MessageChain []MessageChain `json:"messageChain"`
 }
+type SendTempMessage struct {
+	SessionKey   string         `json:"sessionKey"`
+	QQ           int64          `json:"qq"`
+	Group        int64          `json:"group"`
+	MessageChain []MessageChain `json:"messageChain"`
+}

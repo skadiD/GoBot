@@ -14,3 +14,15 @@ func (b Bot) SendFriendMessage(friend int64, msg string) {
 	}
 	Send("sendFriendMessage", test, b.Ws)
 }
+func (b Bot) SendTempMessage(qq, group int64, msg string) {
+	test := structs.SendTempMessage{
+		SessionKey: "",
+		QQ:         qq,
+		Group:      group,
+		MessageChain: []structs.MessageChain{{
+			Type: "Plain",
+			Text: msg,
+		}},
+	}
+	Send("sendTempMessage", test, b.Ws)
+}

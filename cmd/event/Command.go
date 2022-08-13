@@ -47,11 +47,12 @@ func FriendInputStatusChangedEvent(data *gjson.Result, _ []byte) {
 }
 
 // FriendMessage 好友私信
-func FriendMessage(_ *gjson.Result, origin []byte) {
+func FriendMessage(_ *gjson.Result, origin []byte) (string, int) {
 	var _data structs.FriendMessage
 	json.Unmarshal(origin, &_data)
 	globals.Logger().Info("好友 " + strconv.Itoa(_data.Data.Sender.Id) + " 发送消息").Warn("消息内容： " + _data.Data.MessageChain[1].Text).Run()
 	//fmt.Printf(utils.Byte2Str(origin))
+	return _data.Data.MessageChain[1].Text, _data.Data.Sender.Id
 }
 
 // FriendRecallEvent 好友撤回消息

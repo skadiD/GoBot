@@ -6,4 +6,5 @@ const (
 	NewFriendRequestEvent
 	FriendMessage     = "FriendMessage"     // 好友私信
 	FriendRecallEvent = "FriendRecallEvent" // 好友撤销消息
+	TempFriendMessage = "TempMessage"
 )
