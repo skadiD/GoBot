@@ -26,3 +26,14 @@ func (b Bot) SendTempMessage(qq, group int64, msg string) {
 	}
 	Send("sendTempMessage", test, b.Ws)
 }
+func (b Bot) ExecFriendRequest(data structs.FriendRequestEvent, operate int) {
+	test := structs.ExecFriendReq{
+		SessionKey: "",
+		EventId:    data.Data.EventId,
+		FromId:     data.Data.FromId,
+		GroupId:    data.Data.GroupId,
+		Operate:    operate,
+		Message:    data.Data.Message,
+	}
+	Send("resp_newFriendRequestEvent", test, b.Ws)
+}

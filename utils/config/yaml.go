@@ -1,22 +1,25 @@
 package config
 
 import (
+	"github.com/fexli/logger"
 	"gobot/cmd/globals"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"math/rand"
 	"os"
+	"time"
 )
 
 // Create 配置文件创建
 func Create(config interface{}) {
 	text, err := yaml.Marshal(&config)
 	if err != nil {
-		globals.Logger().Warn("创建配置文件出错").Run()
+		logger.RootLogger.Warning(logger.WithContent("配置文件创建失败", err))
 		err = nil
 	}
 	f, err := os.OpenFile("Config.yaml", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
-		globals.Logger().Warn("创建配置文件出错").Run()
+		logger.RootLogger.Error(logger.WithContent("配置文件创建失败", err))
 	} else {
 		n, _ := f.Seek(0, os.SEEK_END)
 		f.WriteAt(text, n)
@@ -26,19 +29,19 @@ func Create(config interface{}) {
 
 // Read 配置文件读取
 func Read() *globals.Common {
+	rand.Seed(time.Now().Unix())
 	config := new(globals.Common)
 	if !FileExist("Config.yaml") {
-		globals.Logger().Warn("配置文件不存在，自动生成中").Run()
+		logger.RootLogger.Warning(logger.WithContent("配置文件不存在，自动生成中"))
 		Create(config)
-		globals.Logger().Info("配置文件创建完毕，请及时修改").Run()
+		logger.RootLogger.System(logger.WithContent("配置文件创建完毕，请及时修改"))
 	}
 	content, err := ioutil.ReadFile("Config.yaml")
 	if err != nil {
-		globals.Logger().Warn("读取Config.yaml出错").Run()
+		logger.RootLogger.Warning(logger.WithContent("读取 Config.yaml 出错", err))
 	}
-
 	if yaml.Unmarshal(content, &config) != nil {
-		globals.Logger().Warn("解析Config.yaml出错")
+		logger.RootLogger.Warning(logger.WithContent("解析 Config.yaml 出错"))
 	}
 	return config
 }

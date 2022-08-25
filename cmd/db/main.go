@@ -1,6 +1,7 @@
 package db
 
 import (
+	"github.com/fexli/logger"
 	"gobot/cmd/globals"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -14,15 +15,15 @@ func Conn() {
 		SkipDefaultTransaction: true,
 	})
 	if err != nil {
-		globals.Logger().Danger("数据库链接失败").Run()
+		logger.RootLogger.Error(logger.WithContent("数据库链接失败", err))
 	}
 	err = globals.Db.AutoMigrate(&ClassGroup{})
 	err = globals.Db.AutoMigrate(&Session{})
 	if err != nil {
-		globals.Logger().Danger("数据库表初始化失败").Run()
+		logger.RootLogger.Error(logger.WithContent("数据库链接失败", err))
 	}
 	sqlDB, _ := globals.Db.DB()
-	sqlDB.SetConnMaxLifetime(7 * time.Hour) // 比8小时最大值略小(线上环境)
-	sqlDB.SetMaxIdleConns(200)              // 连接池最大链接
-	globals.Logger().Success("数据库链接成功").Run()
+	sqlDB.SetConnMaxLifetime(7 * time.Hour)
+	sqlDB.SetMaxIdleConns(200)
+	logger.RootLogger.System(logger.WithContent("数据库链接成功"))
 }

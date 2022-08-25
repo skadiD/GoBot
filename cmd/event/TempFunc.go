@@ -1,9 +1,8 @@
 package event
 
 import (
+	"github.com/fexli/logger"
 	"github.com/tidwall/gjson"
-	"gobot/cmd/globals"
-	"strconv"
 	"strings"
 )
 
@@ -15,10 +14,7 @@ func TempMessage(data *gjson.Result) (string, int64, int64) {
 	message := chain.Get("text").String()
 	switch chain.Get("type").String() {
 	case "Plain":
-		globals.Logger().
-			Info("群 " + strconv.FormatInt(formGroup, 10) + " 内成员 " + strconv.FormatInt(user, 10) + " 发送私聊消息").
-			Success("消息内容: " + message).
-			Run()
+		logger.RootLogger.Notice(logger.WithContent("群 ", formGroup, " 内成员 ", user, " 发送私聊消息", message))
 		return strings.Trim(message, " "), user, formGroup
 	}
 	return "", 0, 0

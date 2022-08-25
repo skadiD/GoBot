@@ -1,6 +1,7 @@
 package command
 
 import (
+	"github.com/fexli/logger"
 	"github.com/goccy/go-json"
 	"github.com/gorilla/websocket"
 	"gobot/cmd/structs"
@@ -8,6 +9,7 @@ import (
 
 // Send 发送请求
 func Send(CommandName string, data interface{}, conn *websocket.Conn) {
+	logger.RootLogger.Debug(logger.WithContent(CommandName, data))
 	_base := structs.SendBase{
 		SyncId:     -1,
 		Command:    CommandName,

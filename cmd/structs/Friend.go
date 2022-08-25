@@ -27,3 +27,23 @@ type FriendRecallEvent struct {
 		Operator  int    `json:"operator"`
 	} `json:"data"`
 }
+
+type FriendRequestEvent struct {
+	SyncId string `json:"syncId"`
+	Data   struct {
+		Type    string `json:"type"`
+		EventId int    `json:"eventId"`
+		FromId  int    `json:"fromId"`
+		GroupId int    `json:"groupId"`
+		Nick    string `json:"nick"`
+		Message string `json:"message"`
+	} `json:"data"`
+}
+type ExecFriendReq struct {
+	SessionKey string `json:"sessionKey"`
+	EventId    int    `json:"eventId"`
+	FromId     int    `json:"fromId"`
+	GroupId    int    `json:"groupId"`
+	Operate    int    `json:"operate"`
+	Message    string `json:"message"`
+}

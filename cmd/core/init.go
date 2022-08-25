@@ -1,23 +1,25 @@
 package core
 
 import (
-	"fmt"
+	"github.com/fexli/logger"
 	"github.com/gorilla/websocket"
 	"gobot/cmd/command"
-	"gobot/cmd/db"
 	"gobot/cmd/event"
 	"gobot/cmd/globals"
-	"gobot/modules/ClassManager"
 	"gobot/utils"
-	"gobot/utils/Logger"
-	"gobot/utils/config"
 	"net/url"
 	"os"
 	"os/signal"
 	"time"
 )
 
-func conn() {
+var retry = 0
+
+func Conn() {
+	if retry >= 3 {
+		logger.RootLogger.Error(logger.WithContent("尝试链接次数过多，已暂停链接"))
+		return
+	}
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 	u := url.URL{
@@ -26,16 +28,15 @@ func conn() {
 		Path:     "/all",
 		RawQuery: "verifyKey=" + globals.Setting.Bot.VerifyKey,
 	}
-	globals.Logger().Info("BOT正在链接中").Run()
-
+	logger.RootLogger.Notice(logger.WithContent("BOT正在链接中"))
 	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		globals.Logger().Danger("与Mirai通讯失败").Info(err.Error()).Run()
+		logger.RootLogger.Error(logger.WithContent("与Mirai通讯失败", err))
 		return
 	}
 	defer c.Close()
 	done := make(chan struct{})
-	globals.Logger().Success("BOT链接成功").Run()
+	logger.RootLogger.System(logger.WithContent("BOT链接成功"))
 	globals.Bot = command.Bot{
 		Ws: c,
 	}
@@ -44,15 +45,15 @@ func conn() {
 		for {
 			_, message, readErr := c.ReadMessage()
 			if readErr != nil {
-				globals.Logger().Warn("读取ws数据失败").Danger(readErr.Error()).Run()
+				logger.RootLogger.Warning(logger.WithContent("BOT链接断开", readErr))
+				retry++
+				logger.RootLogger.Notice(logger.WithContent("正在尝试重连...第", retry, "次"))
+				Conn()
 				return
 			}
-			startT := time.Now()
-			event.ParseCore(message)
-			tc := time.Since(startT)
-			fmt.Printf("cost: %v\n", tc)
+			go event.ParseCore(message)
 			if globals.Setting.Bot.Debug {
-				globals.Logger().Info("Debug").Success(utils.Byte2Str(message)).Run()
+				logger.RootLogger.Debug(logger.WithContent("收到消息", utils.Byte2Str(message)))
 			}
 		}
 	}()
@@ -63,10 +64,10 @@ func conn() {
 		case <-done:
 			return
 		case <-interrupt:
-			globals.Logger().Info("BOT正在退出...").Run()
-			err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-			if err != nil {
-				globals.Logger().Warn("BOT退出失败").Danger(err.Error()).Run()
+			logger.RootLogger.System(logger.WithContent("BOT正在退出..."))
+			_err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			if _err != nil {
+				logger.RootLogger.Warning(logger.WithContent("BOT退出失败", _err))
 				return
 			}
 			select {
@@ -76,12 +77,4 @@ func conn() {
 			return
 		}
 	}
-}
-func Fire() {
-	globals.Logger = Logger.Create()
-	globals.Setting = config.Read()
-	db.Conn()
-	ClassManager.Main()
-	//.//globals.Logger().Warn("test").Info("test").Danger("test").Run()
-	conn()
 }
